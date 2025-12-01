@@ -162,6 +162,15 @@ const Index = () => {
           >
             <Icon name="User" size={24} />
           </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-12 h-12 rounded-xl"
+            onClick={() => navigate('/gifts')}
+          >
+            <Icon name="Gift" size={24} />
+          </Button>
         </div>
 
         <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl" onClick={handleLogout}>
