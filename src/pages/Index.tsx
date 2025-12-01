@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 
@@ -148,7 +145,7 @@ const Index = () => {
               </div>
             </div>
 
-            <ScrollArea className="flex-1">
+            <div className="flex-1 overflow-y-auto">
               <div className="p-2">
                 {chats.map((chat) => (
                   <div
@@ -177,7 +174,7 @@ const Index = () => {
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
           </div>
 
           <div className="flex-1 flex flex-col">
@@ -209,7 +206,7 @@ const Index = () => {
                   </div>
                 </div>
 
-                <ScrollArea className="flex-1 p-6">
+                <div className="flex-1 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {messages.map((message) => (
                       <div key={message.id} className={`flex ${message.sent ? 'justify-end' : 'justify-start'} animate-fade-in`}>
@@ -220,7 +217,7 @@ const Index = () => {
                       </div>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
 
                 <div className="p-4 bg-card border-t border-border">
                   <div className="flex gap-3">
@@ -296,7 +293,7 @@ const Index = () => {
             </div>
           </div>
 
-          <ScrollArea className="flex-1">
+          <div className="flex-1 overflow-y-auto">
             <div className="max-w-2xl mx-auto p-8 space-y-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Мои посты</h2>
@@ -336,7 +333,7 @@ const Index = () => {
                 </Card>
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       )}
     </div>
