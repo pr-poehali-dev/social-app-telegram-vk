@@ -173,8 +173,8 @@ const Index = () => {
           </Button>
         </div>
 
-        <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl" onClick={handleLogout}>
-          <Icon name="LogOut" size={24} />
+        <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl" onClick={() => navigate('/settings')}>
+          <Icon name="Settings" size={24} />
         </Button>
       </div>
 
@@ -215,7 +215,7 @@ const Index = () => {
                               <h3 className="font-semibold text-sm">{user.fullName}</h3>
                               <p className="text-xs text-muted-foreground">{user.username}</p>
                             </div>
-                            <Button size="sm">Написать</Button>
+                            <Button size="sm" onClick={() => navigate(`/profile/${user.username}`)}>Профиль</Button>
                           </div>
                         ))}
                       </div>
@@ -379,9 +379,9 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-              <Button className="rounded-full">
-                <Icon name="Edit" size={18} className="mr-2" />
-                Редактировать
+              <Button className="rounded-full" onClick={() => navigate('/settings')}>
+                <Icon name="Settings" size={18} className="mr-2" />
+                Настройки
               </Button>
             </div>
           </div>
