@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface Chat {
   id: number;
@@ -38,10 +40,33 @@ interface Post {
   image?: string;
 }
 
+interface User {
+  username: string;
+  fullName: string;
+  avatar: string;
+}
+
 const Index = () => {
   const [activeChat, setActiveChat] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
   const [activeView, setActiveView] = useState<'messenger' | 'profile'>('messenger');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [chatMessages, setChatMessages] = useState<{[key: number]: Message[]}>({1: [
+    { id: 1, text: 'Привет! Как дела?', time: '14:30', sent: false },
+    { id: 2, text: 'Привет! Всё отлично, спасибо!', time: '14:31', sent: true },
+    { id: 3, text: 'А у тебя как?', time: '14:31', sent: true },
+    { id: 4, text: 'Тоже хорошо! Работаю над проектом 😊', time: '14:32', sent: false },
+  ]});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = localStorage.getItem('crack_user');
+    if (userData) {
+      setCurrentUser(JSON.parse(userData));
+    }
+  }, []);
 
   const stories: Story[] = [
     { id: 1, username: 'Анна', avatar: '👩', viewed: false },
@@ -60,12 +85,19 @@ const Index = () => {
     { id: 5, name: 'Елена Кузнецова', avatar: '👩‍🦰', lastMessage: 'Спасибо большое!', time: 'Вчера', unread: 0, online: false },
   ];
 
-  const messages: Message[] = [
-    { id: 1, text: 'Привет! Как дела?', time: '14:30', sent: false },
-    { id: 2, text: 'Привет! Всё отлично, спасибо!', time: '14:31', sent: true },
-    { id: 3, text: 'А у тебя как?', time: '14:31', sent: true },
-    { id: 4, text: 'Тоже хорошо! Работаю над проектом 😊', time: '14:32', sent: false },
+  const allUsers = [
+    { username: '@anna_smirnova', fullName: 'Анна Смирнова', avatar: '👩' },
+    { username: '@max_petrov', fullName: 'Максим Петров', avatar: '👨' },
+    { username: '@elena_k', fullName: 'Елена Кузнецова', avatar: '👩‍🦰' },
+    { username: '@dmitriy_work', fullName: 'Дмитрий', avatar: '👨‍💼' },
+    { username: '@maria_art', fullName: 'Мария', avatar: '👩‍🎨' },
+    { username: '@oleg_dev', fullName: 'Олег', avatar: '🧑‍💻' },
   ];
+
+  const filteredUsers = allUsers.filter(user => 
+    user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const posts: Post[] = [
     { id: 1, text: 'Запустил новый проект! 🚀 Очень рад поделиться результатами работы. Это было непросто, но оно того стоило.', likes: 127, comments: 15, time: '2 часа назад' },
@@ -74,9 +106,9 @@ const Index = () => {
   ];
 
   const userProfile = {
-    name: 'Александр Иванов',
-    username: '@alex_dev',
-    avatar: '🧑‍💻',
+    name: currentUser?.fullName || 'Пользователь',
+    username: currentUser?.username || '@user',
+    avatar: currentUser?.avatar || '🧑‍💻',
     bio: 'Frontend разработчик | React энтузиаст | Люблю создавать крутые интерфейсы',
     followers: 1247,
     following: 389,
@@ -84,16 +116,32 @@ const Index = () => {
   };
 
   const sendMessage = () => {
-    if (messageText.trim()) {
+    if (messageText.trim() && activeChat) {
+      const currentMessages = chatMessages[activeChat] || [];
+      const newMessage: Message = {
+        id: Date.now(),
+        text: messageText,
+        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+        sent: true,
+      };
+      setChatMessages({
+        ...chatMessages,
+        [activeChat]: [...currentMessages, newMessage]
+      });
       setMessageText('');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('crack_user');
+    navigate('/auth');
   };
 
   return (
     <div className="h-screen flex bg-background">
       <div className="w-20 bg-card border-r border-border flex flex-col items-center py-6 gap-6">
         <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-2xl cursor-pointer hover:scale-110 transition-transform">
-          🚀
+          ⚡
         </div>
         
         <div className="flex flex-col gap-4 flex-1">
@@ -116,8 +164,8 @@ const Index = () => {
           </Button>
         </div>
 
-        <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl">
-          <Icon name="Settings" size={24} />
+        <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl" onClick={handleLogout}>
+          <Icon name="LogOut" size={24} />
         </Button>
       </div>
 
@@ -126,9 +174,45 @@ const Index = () => {
           <div className="w-96 bg-card border-r border-border flex flex-col">
             <div className="p-4 border-b border-border">
               <h2 className="text-2xl font-bold mb-4">Сообщения</h2>
-              <div className="relative">
-                <Icon name="Search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Поиск..." className="pl-10 bg-muted border-0" />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Icon name="Search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input placeholder="Поиск..." className="pl-10 bg-muted border-0" />
+                </div>
+                <Dialog open={showUserSearch} onOpenChange={setShowUserSearch}>
+                  <DialogTrigger asChild>
+                    <Button size="icon" className="flex-shrink-0">
+                      <Icon name="UserPlus" size={20} />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Найти пользователя</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Введите username или имя"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-muted border-0"
+                      />
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {filteredUsers.map((user) => (
+                          <div key={user.username} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted cursor-pointer transition-colors">
+                            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-xl">
+                              {user.avatar}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-sm">{user.fullName}</h3>
+                              <p className="text-xs text-muted-foreground">{user.username}</p>
+                            </div>
+                            <Button size="sm">Написать</Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
@@ -208,7 +292,7 @@ const Index = () => {
 
                 <div className="flex-1 overflow-y-auto p-6">
                   <div className="space-y-4">
-                    {messages.map((message) => (
+                    {(chatMessages[activeChat] || []).map((message) => (
                       <div key={message.id} className={`flex ${message.sent ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                         <div className={`max-w-md px-4 py-2.5 rounded-2xl ${message.sent ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                           <p className="text-sm">{message.text}</p>
